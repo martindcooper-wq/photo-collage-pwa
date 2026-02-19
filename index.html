@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Photo Collage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <title>Layout Collage</title>
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#111111">
   <style>
     body{font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#f6f6f7;color:#111}
-    header{padding:14px 16px;background:#111;color:#fff;position:sticky;top:0;z-index:10}
+    header{padding:14px 16px;background:#111;color:#fff;position:sticky;top:0;z-index:20}
     header h1{font-size:16px;margin:0}
     .wrap{padding:12px 12px 24px}
     .card{background:#fff;border-radius:14px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:12px}
@@ -16,48 +16,97 @@
     input,select,button{width:100%;padding:10px;border-radius:12px;border:1px solid #ddd;font-size:14px;background:#fff}
     button{background:#111;color:#fff;border:none;font-weight:600}
     button.secondary{background:#fff;color:#111;border:1px solid #ddd}
+    button:disabled{opacity:.5}
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .row > *{flex:1;min-width:160px}
-    canvas{width:100%;height:auto;border-radius:14px;border:1px solid #eee;background:#fafafa}
     .muted{color:#666;font-size:12px}
+
+    /* Collage canvas area (Layout style) */
+    .stage{
+      width:100%;
+      aspect-ratio: 1 / 1;
+      background:#fff;
+      border:1px solid #eee;
+      border-radius:14px;
+      overflow:hidden;
+      position:relative;
+      touch-action:none;
+    }
+    .grid{position:absolute; inset:0; display:grid; gap:6px; padding:6px; background:#f2f2f4}
+    .cell{
+      background:#eaeaf0;
+      border-radius:12px;
+      overflow:hidden;
+      position:relative;
+      border:2px solid transparent;
+      touch-action:none;
+      user-select:none;
+    }
+    .cell.selected{border-color:#111}
+    .cell .hint{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      color:#555; font-size:12px;
+    }
+    .cell img{
+      position:absolute; left:50%; top:50%;
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin:center;
+      will-change: transform;
+      user-select:none;
+      -webkit-user-drag:none;
+      max-width:none;
+    }
+
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap}
+    .toolbar button{flex:1; min-width:150px}
+    .small{font-size:12px}
   </style>
 </head>
 <body>
-  <header><h1>Photo Collage (Offline)</h1></header>
+  <header><h1>Layout Collage (Offline)</h1></header>
 
   <div class="wrap">
     <div class="card">
       <div class="row">
         <div>
-          <label>Site / Header</label>
-          <input id="header" placeholder="e.g., The Red Lion - Plant room">
-        </div>
-        <div>
-          <label>Layout</label>
-          <select id="layout">
-            <option value="3">3-photo evidence</option>
-            <option value="4">2x2 (4 photos)</option>
-            <option value="1+3">Header + 3 grid</option>
+          <label>Template</label>
+          <select id="template">
+            <option value="2v">2 vertical</option>
+            <option value="2h">2 horizontal</option>
+            <option value="3v">3 vertical</option>
+            <option value="3h">3 horizontal</option>
+            <option value="2x2">2x2 (4)</option>
+            <option value="2x3">2x3 (6)</option>
+            <option value="3x3">3x3 (9)</option>
           </select>
         </div>
+        <div>
+          <label>Pick photos</label>
+          <input id="picker" type="file" accept="image/*" multiple />
+        </div>
       </div>
 
-      <div style="margin-top:10px;">
-        <label>Select photos</label>
-        <input id="picker" type="file" accept="image/*" multiple />
-        <p class="muted" style="margin:8px 0 0;">Tip: Pick in the order you want them placed.</p>
+      <div class="toolbar" style="margin-top:10px;">
+        <button class="secondary" id="swapBtn" disabled>Swap mode: OFF</button>
+        <button class="secondary" id="resetBtn" disabled>Reset framing</button>
+        <button id="exportBtn" disabled>Export image</button>
       </div>
 
-      <div class="row" style="margin-top:10px;">
-        <button id="renderBtn">Render Collage</button>
-        <button class="secondary" id="downloadBtn" disabled>Download Image</button>
-      </div>
+      <p class="muted small" style="margin:10px 0 0;">
+        Layout controls: <strong>drag</strong> to reposition, <strong>pinch</strong> to zoom.
+        Turn on <strong>Swap mode</strong> then tap two cells to swap photos.
+      </p>
+      <p class="muted small" id="status" style="margin:8px 0 0;">Ready.</p>
     </div>
 
     <div class="card">
-      <canvas id="canvas" width="1242" height="2208"></canvas>
-      <p class="muted" id="status" style="margin:8px 0 0;">Ready.</p>
+      <div class="stage">
+        <div class="grid" id="grid"></div>
+      </div>
     </div>
+
+    <!-- hidden canvas used for export -->
+    <canvas id="exportCanvas" width="2048" height="2048" style="display:none;"></canvas>
   </div>
 
   <script src="app.js"></script>
