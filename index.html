@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Photo Collage</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <style>
+    body{font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#f6f6f7;color:#111}
+    header{padding:14px 16px;background:#111;color:#fff;position:sticky;top:0;z-index:10}
+    header h1{font-size:16px;margin:0}
+    .wrap{padding:12px 12px 24px}
+    .card{background:#fff;border-radius:14px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:12px}
+    label{display:block;font-size:12px;color:#555;margin-bottom:6px}
+    input,select,button{width:100%;padding:10px;border-radius:12px;border:1px solid #ddd;font-size:14px;background:#fff}
+    button{background:#111;color:#fff;border:none;font-weight:600}
+    button.secondary{background:#fff;color:#111;border:1px solid #ddd}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1;min-width:160px}
+    canvas{width:100%;height:auto;border-radius:14px;border:1px solid #eee;background:#fafafa}
+    .muted{color:#666;font-size:12px}
+  </style>
+</head>
+<body>
+  <header><h1>Photo Collage (Offline)</h1></header>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Site / Header</label>
+          <input id="header" placeholder="e.g., The Red Lion - Plant room">
+        </div>
+        <div>
+          <label>Layout</label>
+          <select id="layout">
+            <option value="3">3-photo evidence</option>
+            <option value="4">2x2 (4 photos)</option>
+            <option value="1+3">Header + 3 grid</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Select photos</label>
+        <input id="picker" type="file" accept="image/*" multiple />
+        <p class="muted" style="margin:8px 0 0;">Tip: Pick in the order you want them placed.</p>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button id="renderBtn">Render Collage</button>
+        <button class="secondary" id="downloadBtn" disabled>Download Image</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <canvas id="canvas" width="1242" height="2208"></canvas>
+      <p class="muted" id="status" style="margin:8px 0 0;">Ready.</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
+  </script>
+</body>
+</html>
